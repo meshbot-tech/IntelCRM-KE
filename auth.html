@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - IntelCRM Kenya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        .auth-container {
+            background: linear-gradient(135deg, #0a1628 0%, #0f2744 100%);
+        }
+        
+        .captcha-box {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            border: 2px solid #00d4ff;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center auth-container">
+    
+    <div class="w-full max-w-md p-6">
+        
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-black tracking-tight mb-2">
+                <span class="text-cyan-400">INTEL</span><span class="text-white">CRM</span>
+            </h1>
+            <p class="text-slate-400 text-sm">Sales Intelligence Before the Call</p>
+        </div>
+
+        <!-- Auth Container -->
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-8 shadow-2xl">
+            
+            <!-- Toggle Buttons -->
+            <div class="flex gap-2 mb-6">
+                <button 
+                    id="signInTab" 
+                    onclick="switchTab('signin')"
+                    class="flex-1 py-2 px-4 rounded-lg font-bold transition-all bg-cyan-600 text-white"
+                >
+                    Sign In
+                </button>
+                <button 
+                    id="signUpTab" 
+                    onclick="switchTab('signup')"
+                    class="flex-1 py-2 px-4 rounded-lg font-bold transition-all bg-slate-800 text-slate-300"
+                >
+                    Create Account
+                </button>
+            </div>
+
+            <!-- Sign In Form -->
+            <div id="signInForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Email</label>
+                    <input 
+                        type="email" 
+                        id="signInEmail"
+                        placeholder="you@company.com"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        autocomplete="email"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Password</label>
+                    <input 
+                        type="password" 
+                        id="signInPassword"
+                        placeholder="••••••••"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        autocomplete="current-password"
+                    />
+                </div>
+
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="rememberMe" class="mr-2" checked>
+                        <span class="text-slate-400">Remember me</span>
+                    </label>
+                    <a href="#" class="text-cyan-400 hover:underline">Forgot password?</a>
+                </div>
+
+                <!-- Math CAPTCHA for Sign In -->
+                <div id="signInCaptcha" class="captcha-box rounded-lg p-4">
+                    <label class="block text-sm font-bold text-white mb-2">Verify you're human</label>
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-white" id="signInCaptchaQuestion"></span>
+                        <input 
+                            type="text" 
+                            id="signInCaptchaAnswer"
+                            placeholder="Answer"
+                            class="flex-1 bg-slate-900 border border-cyan-500 rounded px-3 py-2 text-white text-center text-xl font-bold focus:outline-none focus:border-cyan-400"
+                            maxlength="3"
+                        />
+                    </div>
+                    <p class="text-xs text-cyan-200 mt-2">Solve the math problem to continue</p>
+                </div>
+
+                <button 
+                    onclick="handleSignIn()"
+                    class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-lg transition-all"
+                >
+                    Sign In
+                </button>
+
+                <p class="text-center text-sm text-slate-400">
+                    Don't have an account? 
+                    <button onclick="switchTab('signup')" class="text-cyan-400 hover:underline font-bold">Create one</button>
+                </p>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div id="signUpForm" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Full Name</label>
+                    <input 
+                        type="text" 
+                        id="signUpName"
+                        placeholder="John Doe"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        autocomplete="name"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Company</label>
+                    <input 
+                        type="text" 
+                        id="signUpCompany"
+                        placeholder="Acme Corp"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        autocomplete="organization"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Email</label>
+                    <input 
+                        type="email" 
+                        id="signUpEmail"
+                        placeholder="you@company.com"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        autocomplete="email"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Phone (Optional)</label>
+                    <input 
+                        type="tel" 
+                        id="signUpPhone"
+                        placeholder="+254 700 000000"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        autocomplete="tel"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Password</label>
+                    <input 
+                        type="password" 
+                        id="signUpPassword"
+                        placeholder="••••••••"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        autocomplete="new-password"
+                    />
+                    <p class="text-xs text-slate-500 mt-1">At least 8 characters</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="signUpPasswordConfirm"
+                        placeholder="••••••••"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        autocomplete="new-password"
+                    />
+                </div>
+
+                <!-- Math CAPTCHA for Sign Up -->
+                <div id="signUpCaptcha" class="captcha-box rounded-lg p-4">
+                    <label class="block text-sm font-bold text-white mb-2">Verify you're human</label>
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-bold text-white" id="signUpCaptchaQuestion"></span>
+                        <input 
+                            type="text" 
+                            id="signUpCaptchaAnswer"
+                            placeholder="Answer"
+                            class="flex-1 bg-slate-900 border border-cyan-500 rounded px-3 py-2 text-white text-center text-xl font-bold focus:outline-none focus:border-cyan-400"
+                            maxlength="3"
+                        />
+                    </div>
+                    <p class="text-xs text-cyan-200 mt-2">Solve the math problem to continue</p>
+                </div>
+
+                <label class="flex items-start text-sm">
+                    <input type="checkbox" id="agreeTerms" class="mt-1 mr-2" required>
+                    <span class="text-slate-400">
+                        I agree to the <a href="/terms.html" target="_blank" class="text-cyan-400 hover:underline">Terms of Service</a> and understand IntelCRM is a pre-call intelligence platform.
+                    </span>
+                </label>
+
+                <button 
+                    onclick="handleSignUp()"
+                    class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-lg transition-all"
+                >
+                    Create Account
+                </button>
+
+                <p class="text-center text-sm text-slate-400">
+                    Already have an account? 
+                    <button onclick="switchTab('signin')" class="text-cyan-400 hover:underline font-bold">Sign in</button>
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-6">
+            <a href="/" class="text-slate-400 hover:text-white text-sm">← Back to Home</a>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================
+        // MATH CAPTCHA SYSTEM
+        // ============================================
+
+        let signInCaptchaCorrect = 0;
+        let signUpCaptchaCorrect = 0;
+
+        function generateMathCaptcha(formType) {
+            const num1 = Math.floor(Math.random() * 20) + 1; // 1-20
+            const num2 = Math.floor(Math.random() * 20) + 1; // 1-20
+            const operations = ['+', '-'];
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+            
+            let answer;
+            let question;
+            
+            if (operation === '+') {
+                answer = num1 + num2;
+                question = `${num1} + ${num2} = ?`;
+            } else {
+                // Ensure we don't get negative answers
+                const larger = Math.max(num1, num2);
+                const smaller = Math.min(num1, num2);
+                answer = larger - smaller;
+                question = `${larger} - ${smaller} = ?`;
+            }
+            
+            if (formType === 'signin') {
+                signInCaptchaCorrect = answer;
+                document.getElementById('signInCaptchaQuestion').textContent = question;
+            } else {
+                signUpCaptchaCorrect = answer;
+                document.getElementById('signUpCaptchaQuestion').textContent = question;
+            }
+        }
+
+        function verifyCaptcha(formType) {
+            const userAnswer = formType === 'signin' 
+                ? parseInt(document.getElementById('signInCaptchaAnswer').value)
+                : parseInt(document.getElementById('signUpCaptchaAnswer').value);
+            
+            const correctAnswer = formType === 'signin' ? signInCaptchaCorrect : signUpCaptchaCorrect;
+            
+            if (userAnswer !== correctAnswer) {
+                alert('❌ Incorrect answer. Please try again.');
+                generateMathCaptcha(formType);
+                if (formType === 'signin') {
+                    document.getElementById('signInCaptchaAnswer').value = '';
+                } else {
+                    document.getElementById('signUpCaptchaAnswer').value = '';
+                }
+                return false;
+            }
+            return true;
+        }
+
+        // ============================================
+        // TAB SWITCHING
+        // ============================================
+
+        function switchTab(tab) {
+            const signInTab = document.getElementById('signInTab');
+            const signUpTab = document.getElementById('signUpTab');
+            const signInForm = document.getElementById('signInForm');
+            const signUpForm = document.getElementById('signUpForm');
+
+            if (tab === 'signin') {
+                signInTab.classList.add('bg-cyan-600', 'text-white');
+                signInTab.classList.remove('bg-slate-800', 'text-slate-300');
+                signUpTab.classList.add('bg-slate-800', 'text-slate-300');
+                signUpTab.classList.remove('bg-cyan-600', 'text-white');
+                signInForm.classList.remove('hidden');
+                signUpForm.classList.add('hidden');
+                generateMathCaptcha('signin');
+            } else {
+                signUpTab.classList.add('bg-cyan-600', 'text-white');
+                signUpTab.classList.remove('bg-slate-800', 'text-slate-300');
+                signInTab.classList.add('bg-slate-800', 'text-slate-300');
+                signInTab.classList.remove('bg-cyan-600', 'text-white');
+                signUpForm.classList.remove('hidden');
+                signInForm.classList.add('hidden');
+                generateMathCaptcha('signup');
+            }
+        }
+
+        // ============================================
+        // SIGN IN HANDLER
+        // ============================================
+
+        function handleSignIn() {
+            const email = document.getElementById('signInEmail').value.trim();
+            const password = document.getElementById('signInPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            // Validation
+            if (!email || !password) {
+                alert('❌ Please fill in all fields');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                alert('❌ Please enter a valid email address');
+                return;
+            }
+
+            // Verify CAPTCHA
+            if (!verifyCaptcha('signin')) {
+                return;
+            }
+
+            // Check if user exists
+            const users = JSON.parse(localStorage.getItem('intelcrm_users') || '[]');
+            const user = users.find(u => u.email === email);
+
+            if (!user) {
+                alert('❌ No account found with this email. Please create an account first.');
+                switchTab('signup');
+                return;
+            }
+
+            if (user.password !== password) {
+                alert('❌ Incorrect password. Please try again.');
+                generateMathCaptcha('signin');
+                document.getElementById('signInCaptchaAnswer').value = '';
+                return;
+            }
+
+            // Successful sign in
+            if (rememberMe) {
+                localStorage.setItem('intelcrm_current_user', JSON.stringify(user));
+            } else {
+                sessionStorage.setItem('intelcrm_current_user', JSON.stringify(user));
+            }
+
+            // Track sign in
+            user.lastLogin = new Date().toISOString();
+            const userIndex = users.findIndex(u => u.email === email);
+            users[userIndex] = user;
+            localStorage.setItem('intelcrm_users', JSON.stringify(users));
+
+            // Success message
+            alert(`✅ Welcome back, ${user.name}!`);
+
+            // Redirect to app
+            window.location.href = 'https://app.intelcrm.ke';
+        }
+
+        // ============================================
+        // SIGN UP HANDLER
+        // ============================================
+
+        function handleSignUp() {
+            const name = document.getElementById('signUpName').value.trim();
+            const company = document.getElementById('signUpCompany').value.trim();
+            const email = document.getElementById('signUpEmail').value.trim();
+            const phone = document.getElementById('signUpPhone').value.trim();
+            const password = document.getElementById('signUpPassword').value;
+            const passwordConfirm = document.getElementById('signUpPasswordConfirm').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+
+            // Validation
+            if (!name || !email || !company || !password || !passwordConfirm) {
+                alert('❌ Please fill in all required fields');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                alert('❌ Please enter a valid email address');
+                return;
+            }
+
+            if (password.length < 8) {
+                alert('❌ Password must be at least 8 characters');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                alert('❌ Passwords do not match');
+                return;
+            }
+
+            if (!agreeTerms) {
+                alert('❌ Please agree to the Terms of Service');
+                return;
+            }
+
+            // Verify CAPTCHA
+            if (!verifyCaptcha('signup')) {
+                return;
+            }
+
+            // Check if user already exists
+            const users = JSON.parse(localStorage.getItem('intelcrm_users') || '[]');
+            const existingUser = users.find(u => u.email === email);
+
+            if (existingUser) {
+                alert('❌ An account with this email already exists. Please sign in instead.');
+                switchTab('signin');
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                id: Date.now().toString(),
+                name,
+                company,
+                email,
+                phone,
+                password, // In production, NEVER store plain passwords! Hash them!
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString(),
+                plan: 'trial',
+                trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() // 14 days trial
+            };
+
+            // Save to localStorage
+            users.push(newUser);
+            localStorage.setItem('intelcrm_users', JSON.stringify(users));
+            localStorage.setItem('intelcrm_current_user', JSON.stringify(newUser));
+
+            // Success message
+            alert(`✅ Account created successfully! Welcome to IntelCRM, ${name}!`);
+
+            // Redirect to app
+            window.location.href = 'https://app.intelcrm.ke';
+        }
+
+        // ============================================
+        // AUTO-FILL FOR RETURNING USERS
+        // ============================================
+
+        function checkForExistingUser() {
+            const currentUser = JSON.parse(localStorage.getItem('intelcrm_current_user') || 
+                                sessionStorage.getItem('intelcrm_current_user') || 'null');
+            
+            if (currentUser) {
+                // User is already logged in
+                const continueToApp = confirm(`You're already signed in as ${currentUser.name}. Continue to IntelCRM?`);
+                if (continueToApp) {
+                    window.location.href = 'https://app.intelcrm.ke';
+                } else {
+                    // Log out
+                    localStorage.removeItem('intelcrm_current_user');
+                    sessionStorage.removeItem('intelcrm_current_user');
+                }
+            } else {
+                // Auto-fill last email if available
+                const users = JSON.parse(localStorage.getItem('intelcrm_users') || '[]');
+                if (users.length > 0) {
+                    const lastUser = users[users.length - 1];
+                    document.getElementById('signInEmail').value = lastUser.email;
+                }
+            }
+        }
+
+        // ============================================
+        // INITIALIZE ON PAGE LOAD
+        // ============================================
+
+        window.addEventListener('DOMContentLoaded', () => {
+            generateMathCaptcha('signin');
+            generateMathCaptcha('signup');
+            checkForExistingUser();
+
+            // Enter key handlers
+            document.getElementById('signInPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSignIn();
+            });
+
+            document.getElementById('signInCaptchaAnswer').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSignIn();
+            });
+
+            document.getElementById('signUpPasswordConfirm').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSignUp();
+            });
+
+            document.getElementById('signUpCaptchaAnswer').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSignUp();
+            });
+        });
+    </script>
+
+</body>
+</html>
