@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - IntelCRM Kenya</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center">
+    
+    <div class="w-full max-w-md p-6">
+        
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-black tracking-tight mb-2">
+                <span class="text-cyan-400">INTEL</span><span class="text-white">CRM</span>
+            </h1>
+            <p class="text-slate-400 text-sm">Complete Your Payment</p>
+        </div>
+
+        <!-- Payment Container -->
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-8 shadow-2xl">
+            
+            <!-- Plan Summary -->
+            <div class="bg-cyan-900/20 border border-cyan-700 rounded-lg p-4 mb-6">
+                <p class="text-xs text-cyan-400 mb-1">SELECTED PLAN</p>
+                <h2 id="planName" class="text-2xl font-black text-white mb-2">Team Plan</h2>
+                <div class="flex items-baseline">
+                    <span id="planPrice" class="text-3xl font-bold text-white">KES 18,100</span>
+                    <span class="text-slate-400 ml-2">/month</span>
+                </div>
+                <p class="text-xs text-cyan-200 mt-2">✓ 14-day free trial • Cancel anytime</p>
+            </div>
+
+            <!-- Payment Method Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-slate-300 mb-3">Select Payment Method</label>
+                
+                <!-- M-Pesa Option (Recommended) -->
+                <div class="mb-3">
+                    <label class="flex items-center bg-slate-800 hover:bg-slate-700 border-2 border-cyan-500 rounded-lg p-4 cursor-pointer transition-all">
+                        <input type="radio" name="paymentMethod" value="mpesa" class="mr-3" checked>
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <span class="text-white font-bold">M-Pesa</span>
+                                <span class="ml-2 bg-green-600 text-white text-xs px-2 py-0.5 rounded">Recommended</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Pay with your M-Pesa number</p>
+                        </div>
+                        <div class="text-2xl">📱</div>
+                    </label>
+                </div>
+
+                <!-- Card Option -->
+                <div class="mb-3">
+                    <label class="flex items-center bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-4 cursor-pointer transition-all">
+                        <input type="radio" name="paymentMethod" value="card" class="mr-3">
+                        <div class="flex-1">
+                            <span class="text-white font-bold">Credit/Debit Card</span>
+                            <p class="text-xs text-slate-400 mt-1">Visa, Mastercard accepted</p>
+                        </div>
+                        <div class="text-2xl">💳</div>
+                    </label>
+                </div>
+
+                <!-- Bank Transfer Option -->
+                <div>
+                    <label class="flex items-center bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg p-4 cursor-pointer transition-all">
+                        <input type="radio" name="paymentMethod" value="bank" class="mr-3">
+                        <div class="flex-1">
+                            <span class="text-white font-bold">Bank Transfer</span>
+                            <p class="text-xs text-slate-400 mt-1">Direct bank payment</p>
+                        </div>
+                        <div class="text-2xl">🏦</div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- M-Pesa Payment Form -->
+            <div id="mpesaForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-2">M-Pesa Phone Number</label>
+                    <input 
+                        type="tel" 
+                        id="mpesaPhone"
+                        placeholder="254 700 000000"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:outline-none"
+                        pattern="[0-9]{12}"
+                    />
+                    <p class="text-xs text-slate-500 mt-1">Enter number without + or spaces (e.g., 254700123456)</p>
+                </div>
+
+                <div class="bg-amber-900/20 border border-amber-700 rounded-lg p-4">
+                    <p class="text-sm text-amber-200">
+                        <strong>How M-Pesa payment works:</strong>
+                    </p>
+                    <ol class="text-xs text-amber-100 mt-2 space-y-1 list-decimal list-inside">
+                        <li>Enter your M-Pesa phone number</li>
+                        <li>Click "Pay with M-Pesa" button</li>
+                        <li>You'll receive an STK push on your phone</li>
+                        <li>Enter your M-Pesa PIN to confirm</li>
+                        <li>You'll get instant access to IntelCRM</li>
+                    </ol>
+                </div>
+
+                <button 
+                    onclick="initiatePayment()"
+                    class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-lg transition-all flex items-center justify-center"
+                >
+                    <span class="text-xl mr-2">📱</span>
+                    Pay with M-Pesa
+                </button>
+            </div>
+
+            <!-- Card Payment Form (Hidden by default) -->
+            <div id="cardForm" class="space-y-4 hidden">
+                <p class="text-center text-slate-400 py-8">
+                    Card payment coming soon!<br>
+                    Please use M-Pesa for now.
+                </p>
+            </div>
+
+            <!-- Bank Transfer Info (Hidden by default) -->
+            <div id="bankForm" class="hidden">
+                <div class="bg-slate-800 border border-slate-700 rounded-lg p-4 space-y-2 text-sm">
+                    <p class="text-white font-bold">Bank Transfer Details:</p>
+                    <div>
+                        <span class="text-slate-400">Bank:</span>
+                        <span class="text-white ml-2">Equity Bank Kenya</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400">Account Name:</span>
+                        <span class="text-white ml-2">IntelCRM Kenya</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400">Account Number:</span>
+                        <span class="text-white ml-2">0123456789</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400">Amount:</span>
+                        <span class="text-white ml-2 font-bold" id="transferAmount">KES 18,100</span>
+                    </div>
+                    <p class="text-xs text-amber-300 mt-3">
+                        ⚠️ Send payment confirmation to info@intelcrm.ke
+                    </p>
+                </div>
+            </div>
+
+            <!-- Security Badge -->
+            <div class="mt-6 flex items-center justify-center text-xs text-slate-500">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                </svg>
+                Secure payment • SSL encrypted
+            </div>
+
+        </div>
+
+        <!-- Back Link -->
+        <div class="text-center mt-6">
+            <a href="/auth.html" class="text-slate-400 hover:text-white text-sm">← Back to Sign Up</a>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================
+        // GET PLAN INFO FROM URL
+        // ============================================
+        
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        function loadPlanInfo() {
+            const plan = getUrlParameter('plan') || 'team';
+            const amount = getUrlParameter('amount') || '18100';
+            
+            const planNames = {
+                'starter': 'Starter Plan',
+                'team': 'Team Plan',
+                'enterprise': 'Enterprise Plan'
+            };
+            
+            document.getElementById('planName').textContent = planNames[plan] || plan;
+            document.getElementById('planPrice').textContent = 'KES ' + parseInt(amount).toLocaleString();
+            document.getElementById('transferAmount').textContent = 'KES ' + parseInt(amount).toLocaleString();
+            
+            // Store in sessionStorage
+            sessionStorage.setItem('payment_plan', plan);
+            sessionStorage.setItem('payment_amount', amount);
+        }
+
+        // ============================================
+        // PAYMENT METHOD SWITCHING
+        // ============================================
+
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Hide all forms
+                document.getElementById('mpesaForm').classList.add('hidden');
+                document.getElementById('cardForm').classList.add('hidden');
+                document.getElementById('bankForm').classList.add('hidden');
+                
+                // Show selected form
+                if (e.target.value === 'mpesa') {
+                    document.getElementById('mpesaForm').classList.remove('hidden');
+                } else if (e.target.value === 'card') {
+                    document.getElementById('cardForm').classList.remove('hidden');
+                } else if (e.target.value === 'bank') {
+                    document.getElementById('bankForm').classList.remove('hidden');
+                }
+            });
+        });
+
+        // ============================================
+        // M-PESA PAYMENT INTEGRATION
+        // ============================================
+
+        function initiatePayment() {
+            const phone = document.getElementById('mpesaPhone').value.trim();
+            const plan = sessionStorage.getItem('payment_plan');
+            const amount = sessionStorage.getItem('payment_amount');
+            
+            // Validation
+            if (!phone) {
+                alert('❌ Please enter your M-Pesa phone number');
+                return;
+            }
+            
+            if (!/^254[0-9]{9}$/.test(phone)) {
+                alert('❌ Please enter a valid phone number (e.g., 254700123456)');
+                return;
+            }
+            
+            // Show processing message
+            alert('📱 Initiating M-Pesa payment...\n\nPlease wait for the STK push on your phone.');
+            
+            // ============================================
+            // PRODUCTION: REPLACE THIS WITH REAL M-PESA API CALL
+            // ============================================
+            
+            // Example: Call your backend M-Pesa API
+            /*
+            fetch('https://your-backend.com/api/mpesa/stk-push', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: phone,
+                    amount: amount,
+                    plan: plan,
+                    accountReference: 'IntelCRM-' + plan,
+                    description: 'IntelCRM ' + plan + ' subscription'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Poll for payment status
+                    checkPaymentStatus(data.checkoutRequestID);
+                } else {
+                    alert('❌ Payment initiation failed: ' + data.message);
+                }
+            })
+            .catch(err => {
+                alert('❌ Error: ' + err.message);
+            });
+            */
+            
+            // FOR MVP/DEMO: Simulate payment success
+            setTimeout(() => {
+                const confirmed = confirm('🎉 M-Pesa payment successful!\n\nYou now have access to IntelCRM ' + plan + ' plan.\n\nClick OK to continue to your dashboard.');
+                
+                if (confirmed) {
+                    // Mark user as paid
+                    const currentUser = JSON.parse(localStorage.getItem('intelcrm_current_user') || '{}');
+                    currentUser.paymentStatus = 'paid';
+                    currentUser.currentPlan = plan;
+                    currentUser.paymentDate = new Date().toISOString();
+                    currentUser.mpesaPhone = phone;
+                    localStorage.setItem('intelcrm_current_user', JSON.stringify(currentUser));
+                    
+                    // Redirect to app
+                    window.location.href = 'https://app.intelcrm.ke';
+                }
+            }, 2000);
+        }
+
+        // Check payment status (for production)
+        function checkPaymentStatus(checkoutRequestID) {
+            // Poll backend for payment confirmation
+            // Implement retry logic with timeout
+        }
+
+        // ============================================
+        // INITIALIZE
+        // ============================================
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPlanInfo();
+        });
+    </script>
+
+</body>
+</html>
