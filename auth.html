@@ -34,6 +34,9 @@
         <!-- Auth Container -->
         <div class="bg-slate-900 border border-slate-700 rounded-lg p-8 shadow-2xl">
             
+            <!-- Plan Banner (if coming from pricing page) -->
+            <div id="planBanner" class="hidden"></div>
+
             <!-- Toggle Buttons -->
             <div class="flex gap-2 mb-6">
                 <button 
@@ -81,20 +84,18 @@
                         <input type="checkbox" id="rememberMe" class="mr-2" checked>
                         <span class="text-slate-400">Remember me</span>
                     </label>
-                    <a href="#" class="text-cyan-400 hover:underline">Forgot password?</a>
                 </div>
 
                 <!-- Math CAPTCHA for Sign In -->
-                <div id="signInCaptcha" class="captcha-box rounded-lg p-4">
+                <div class="captcha-box rounded-lg p-4">
                     <label class="block text-sm font-bold text-white mb-2">Verify you're human</label>
                     <div class="flex items-center gap-3">
                         <span class="text-2xl font-bold text-white" id="signInCaptchaQuestion"></span>
                         <input 
-                            type="text" 
+                            type="number" 
                             id="signInCaptchaAnswer"
-                            placeholder="Answer"
+                            placeholder="?"
                             class="flex-1 bg-slate-900 border border-cyan-500 rounded px-3 py-2 text-white text-center text-xl font-bold focus:outline-none focus:border-cyan-400"
-                            maxlength="3"
                         />
                     </div>
                     <p class="text-xs text-cyan-200 mt-2">Solve the math problem to continue</p>
@@ -183,23 +184,22 @@
                 </div>
 
                 <!-- Math CAPTCHA for Sign Up -->
-                <div id="signUpCaptcha" class="captcha-box rounded-lg p-4">
+                <div class="captcha-box rounded-lg p-4">
                     <label class="block text-sm font-bold text-white mb-2">Verify you're human</label>
                     <div class="flex items-center gap-3">
                         <span class="text-2xl font-bold text-white" id="signUpCaptchaQuestion"></span>
                         <input 
-                            type="text" 
+                            type="number" 
                             id="signUpCaptchaAnswer"
-                            placeholder="Answer"
+                            placeholder="?"
                             class="flex-1 bg-slate-900 border border-cyan-500 rounded px-3 py-2 text-white text-center text-xl font-bold focus:outline-none focus:border-cyan-400"
-                            maxlength="3"
                         />
                     </div>
                     <p class="text-xs text-cyan-200 mt-2">Solve the math problem to continue</p>
                 </div>
 
                 <label class="flex items-start text-sm">
-                    <input type="checkbox" id="agreeTerms" class="mt-1 mr-2" required>
+                    <input type="checkbox" id="agreeTerms" class="mt-1 mr-2">
                     <span class="text-slate-400">
                         I agree to the <a href="/terms.html" target="_blank" class="text-cyan-400 hover:underline">Terms of Service</a> and understand IntelCRM is a pre-call intelligence platform.
                     </span>
@@ -236,8 +236,8 @@
         let signUpCaptchaCorrect = 0;
 
         function generateMathCaptcha(formType) {
-            const num1 = Math.floor(Math.random() * 20) + 1; // 1-20
-            const num2 = Math.floor(Math.random() * 20) + 1; // 1-20
+            const num1 = Math.floor(Math.random() * 20) + 1;
+            const num2 = Math.floor(Math.random() * 20) + 1;
             const operations = ['+', '-'];
             const operation = operations[Math.floor(Math.random() * operations.length)];
             
@@ -248,7 +248,6 @@
                 answer = num1 + num2;
                 question = `${num1} + ${num2} = ?`;
             } else {
-                // Ensure we don't get negative answers
                 const larger = Math.max(num1, num2);
                 const smaller = Math.min(num1, num2);
                 answer = larger - smaller;
@@ -258,27 +257,26 @@
             if (formType === 'signin') {
                 signInCaptchaCorrect = answer;
                 document.getElementById('signInCaptchaQuestion').textContent = question;
+                document.getElementById('signInCaptchaAnswer').value = '';
             } else {
                 signUpCaptchaCorrect = answer;
                 document.getElementById('signUpCaptchaQuestion').textContent = question;
+                document.getElementById('signUpCaptchaAnswer').value = '';
             }
         }
 
         function verifyCaptcha(formType) {
-            const userAnswer = formType === 'signin' 
-                ? parseInt(document.getElementById('signInCaptchaAnswer').value)
-                : parseInt(document.getElementById('signUpCaptchaAnswer').value);
+            const inputField = formType === 'signin' 
+                ? document.getElementById('signInCaptchaAnswer')
+                : document.getElementById('signUpCaptchaAnswer');
             
+            const userAnswer = parseInt(inputField.value);
             const correctAnswer = formType === 'signin' ? signInCaptchaCorrect : signUpCaptchaCorrect;
             
-            if (userAnswer !== correctAnswer) {
-                alert('❌ Incorrect answer. Please try again.');
+            if (isNaN(userAnswer) || userAnswer !== correctAnswer) {
+                alert('❌ Incorrect answer. Please try the new math problem.');
                 generateMathCaptcha(formType);
-                if (formType === 'signin') {
-                    document.getElementById('signInCaptchaAnswer').value = '';
-                } else {
-                    document.getElementById('signUpCaptchaAnswer').value = '';
-                }
+                inputField.focus();
                 return false;
             }
             return true;
@@ -316,42 +314,55 @@
         // ============================================
         // SIGN IN HANDLER
         // ============================================
-]
+
         function handleSignIn() {
             const email = document.getElementById('signInEmail').value.trim();
             const password = document.getElementById('signInPassword').value;
             const rememberMe = document.getElementById('rememberMe').checked;
 
             // Validation
-            if (!email || !password) {
-                alert('❌ Please fill in all fields');
+            if (!email) {
+                alert('❌ Please enter your email');
+                document.getElementById('signInEmail').focus();
                 return;
             }
 
-            if (!email.includes('@')) {
+            if (!email.includes('@') || !email.includes('.')) {
                 alert('❌ Please enter a valid email address');
+                document.getElementById('signInEmail').focus();
                 return;
             }
 
-            // Verify CAPTCHA
+            if (!password) {
+                alert('❌ Please enter your password');
+                document.getElementById('signInPassword').focus();
+                return;
+            }
+
+            // Verify CAPTCHA FIRST
             if (!verifyCaptcha('signin')) {
                 return;
             }
 
             // Check if user exists
             const users = JSON.parse(localStorage.getItem('intelcrm_users') || '[]');
-            const user = users.find(u => u.email === email);
+            const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
             if (!user) {
-                alert('❌ No account found with this email. Please create an account first.');
-                switchTab('signup');
+                const createAccount = confirm('❌ No account found with this email.\n\nWould you like to create an account?');
+                if (createAccount) {
+                    switchTab('signup');
+                    document.getElementById('signUpEmail').value = email;
+                    document.getElementById('signUpEmail').focus();
+                }
                 return;
             }
 
             if (user.password !== password) {
                 alert('❌ Incorrect password. Please try again.');
+                document.getElementById('signInPassword').value = '';
+                document.getElementById('signInPassword').focus();
                 generateMathCaptcha('signin');
-                document.getElementById('signInCaptchaAnswer').value = '';
                 return;
             }
 
@@ -362,17 +373,17 @@
                 sessionStorage.setItem('intelcrm_current_user', JSON.stringify(user));
             }
 
-            // Track sign in
+            // Update last login
             user.lastLogin = new Date().toISOString();
-            const userIndex = users.findIndex(u => u.email === email);
+            const userIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
             users[userIndex] = user;
             localStorage.setItem('intelcrm_users', JSON.stringify(users));
 
-            // Success message
+            // Success!
             alert(`✅ Welcome back, ${user.name}!`);
 
-            // Redirect to app
-            window.location.href = 'https://binary-crest-7206.d.kiloapps.io/app';
+            // Redirect to IntelCRM system
+            window.location.href = 'https://app.intelcrm.ke';
         }
 
         // ============================================
@@ -389,28 +400,51 @@
             const agreeTerms = document.getElementById('agreeTerms').checked;
 
             // Validation
-            if (!name || !email || !company || !password || !passwordConfirm) {
-                alert('❌ Please fill in all required fields');
+            if (!name) {
+                alert('❌ Please enter your name');
+                document.getElementById('signUpName').focus();
                 return;
             }
 
-            if (!email.includes('@')) {
+            if (!company) {
+                alert('❌ Please enter your company name');
+                document.getElementById('signUpCompany').focus();
+                return;
+            }
+
+            if (!email) {
+                alert('❌ Please enter your email');
+                document.getElementById('signUpEmail').focus();
+                return;
+            }
+
+            if (!email.includes('@') || !email.includes('.')) {
                 alert('❌ Please enter a valid email address');
+                document.getElementById('signUpEmail').focus();
+                return;
+            }
+
+            if (!password) {
+                alert('❌ Please enter a password');
+                document.getElementById('signUpPassword').focus();
                 return;
             }
 
             if (password.length < 8) {
                 alert('❌ Password must be at least 8 characters');
+                document.getElementById('signUpPassword').focus();
                 return;
             }
 
             if (password !== passwordConfirm) {
                 alert('❌ Passwords do not match');
+                document.getElementById('signUpPasswordConfirm').focus();
                 return;
             }
 
             if (!agreeTerms) {
                 alert('❌ Please agree to the Terms of Service');
+                document.getElementById('agreeTerms').focus();
                 return;
             }
 
@@ -421,13 +455,21 @@
 
             // Check if user already exists
             const users = JSON.parse(localStorage.getItem('intelcrm_users') || '[]');
-            const existingUser = users.find(u => u.email === email);
+            const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
 
             if (existingUser) {
-                alert('❌ An account with this email already exists. Please sign in instead.');
-                switchTab('signin');
+                const goToSignIn = confirm('❌ An account with this email already exists.\n\nWould you like to sign in instead?');
+                if (goToSignIn) {
+                    switchTab('signin');
+                    document.getElementById('signInEmail').value = email;
+                    document.getElementById('signInPassword').focus();
+                }
                 return;
             }
+
+            // Get selected plan from URL or session
+            const selectedPlan = sessionStorage.getItem('selected_plan') || 'starter';
+            const selectedPrice = sessionStorage.getItem('selected_price') || '5400';
 
             // Create new user
             const newUser = {
@@ -436,23 +478,70 @@
                 company,
                 email,
                 phone,
-                password, // In production, NEVER store plain passwords! Hash them!
+                password,
                 createdAt: new Date().toISOString(),
                 lastLogin: new Date().toISOString(),
-                plan: 'trial',
-                trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() // 14 days trial
+                selectedPlan: selectedPlan,
+                selectedPrice: selectedPrice,
+                currentPlan: 'trial',
+                trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+                paymentStatus: 'trial'
             };
 
-            // Save to localStorage
+            // Save user
             users.push(newUser);
             localStorage.setItem('intelcrm_users', JSON.stringify(users));
             localStorage.setItem('intelcrm_current_user', JSON.stringify(newUser));
 
-            // Success message
+            // Success!
             alert(`✅ Account created successfully! Welcome to IntelCRM, ${name}!`);
 
-            // Redirect to app
-            window.location.href = 'https://app.intelcrm.ke';
+            // Redirect to IntelCRM system
+            window.location.href = 'https://binary-crest-7206.d.kiloapps.io/app';
+        }
+
+        // ============================================
+        // PLAN SELECTION FROM URL
+        // ============================================
+
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        function handlePlanSelection() {
+            const plan = getUrlParameter('plan');
+            const price = getUrlParameter('price');
+            
+            if (plan && price) {
+                sessionStorage.setItem('selected_plan', plan);
+                sessionStorage.setItem('selected_price', price);
+                showPlanBanner(plan, price);
+            }
+        }
+
+        function showPlanBanner(plan, price) {
+            const planNames = {
+                'starter': 'Starter Plan',
+                'team': 'Team Plan',
+                'enterprise': 'Enterprise Plan'
+            };
+            
+            const banner = document.getElementById('planBanner');
+            banner.className = 'bg-cyan-900/30 border border-cyan-700 rounded-lg p-4 mb-6';
+            banner.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-cyan-400">Selected Plan</p>
+                        <p class="text-lg font-black text-white">${planNames[plan] || plan}</p>
+                        <p class="text-sm text-slate-300">KES ${parseInt(price).toLocaleString()}/month</p>
+                    </div>
+                    <div class="text-xs text-cyan-200">
+                        <p>✓ 14-day free trial</p>
+                        <p>✓ Cancel anytime</p>
+                    </div>
+                </div>
+            `;
         }
 
         // ============================================
@@ -460,21 +549,21 @@
         // ============================================
 
         function checkForExistingUser() {
+            // Check if already logged in
             const currentUser = JSON.parse(localStorage.getItem('intelcrm_current_user') || 
                                 sessionStorage.getItem('intelcrm_current_user') || 'null');
             
             if (currentUser) {
-                // User is already logged in
-                const continueToApp = confirm(`You're already signed in as ${currentUser.name}. Continue to IntelCRM?`);
+                const continueToApp = confirm(`You're already signed in as ${currentUser.name}.\n\nContinue to IntelCRM?`);
                 if (continueToApp) {
-                    window.location.href = 'https://app.intelcrm.ke';
+                    window.location.href = 'https://binary-crest-7206.d.kiloapps.io/app';
                 } else {
                     // Log out
                     localStorage.removeItem('intelcrm_current_user');
                     sessionStorage.removeItem('intelcrm_current_user');
                 }
             } else {
-                // Auto-fill last email if available
+                // Auto-fill last used email
                 const users = JSON.parse(localStorage.getItem('intelcrm_users') || '[]');
                 if (users.length > 0) {
                     const lastUser = users[users.length - 1];
@@ -484,15 +573,11 @@
         }
 
         // ============================================
-        // INITIALIZE ON PAGE LOAD
+        // ENTER KEY HANDLERS
         // ============================================
 
-        window.addEventListener('DOMContentLoaded', () => {
-            generateMathCaptcha('signin');
-            generateMathCaptcha('signup');
-            checkForExistingUser();
-
-            // Enter key handlers
+        function setupEnterKeyHandlers() {
+            // Sign In - Enter on password or CAPTCHA
             document.getElementById('signInPassword').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleSignIn();
             });
@@ -501,6 +586,7 @@
                 if (e.key === 'Enter') handleSignIn();
             });
 
+            // Sign Up - Enter on confirm password or CAPTCHA
             document.getElementById('signUpPasswordConfirm').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleSignUp();
             });
@@ -508,6 +594,25 @@
             document.getElementById('signUpCaptchaAnswer').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleSignUp();
             });
+        }
+
+        // ============================================
+        // INITIALIZE ON PAGE LOAD
+        // ============================================
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Generate initial CAPTCHAs
+            generateMathCaptcha('signin');
+            generateMathCaptcha('signup');
+            
+            // Handle plan selection from URL
+            handlePlanSelection();
+            
+            // Check for existing user
+            checkForExistingUser();
+            
+            // Setup enter key handlers
+            setupEnterKeyHandlers();
         });
     </script>
 
